@@ -154,6 +154,173 @@ Source: {CHANGELOG_URL}
         raise
 
 
+def create_index_html():
+    """Create index.html for GitHub Pages."""
+    try:
+        index_file = OUTPUT_DIR / "index.html"
+        html_content = '''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trae.ai Changelog</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown.min.css">
+    <style>
+        body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 45px;
+            background-color: #0d1117;
+        }
+        .markdown-body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+        }
+        .markdown-body img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2em;
+            padding: 2em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            color: white;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+        .header p {
+            margin: 0.5em 0 0 0;
+            opacity: 0.9;
+        }
+        .update-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #238636;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+        .update-badge .time {
+            font-weight: 600;
+        }
+        .loading {
+            text-align: center;
+            padding: 3em;
+            color: #8b949e;
+        }
+        .spinner {
+            border: 3px solid #30363d;
+            border-top: 3px solid #58a6ff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1em;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .github-link {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #21262d;
+            color: #c9d1d9;
+            padding: 10px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            font-size: 13px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: background 0.2s;
+        }
+        .github-link:hover {
+            background: #30363d;
+        }
+        .error {
+            background: #da3633;
+            color: white;
+            padding: 1em;
+            border-radius: 6px;
+            margin: 2em 0;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="header">
+        <h1>Trae.ai Changelog</h1>
+        <p>Automatically updated every 15 minutes</p>
+    </div>
+
+    <div class="update-badge" id="update-badge">
+        <div class="time" id="update-time">Loading...</div>
+    </div>
+
+    <article class="markdown-body" id="content">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading changelog...</p>
+        </div>
+    </article>
+
+    <a href="https://github.com/amacsmith/trae-changelog-scraper" class="github-link" target="_blank">
+        View on GitHub
+    </a>
+
+    <script>
+        fetch('changelog.md')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(text => {
+                document.getElementById('content').innerHTML = marked.parse(text);
+                const match = text.match(/Last updated: (.+)/);
+                if (match) {
+                    document.getElementById('update-time').innerHTML =
+                        '<div style="font-size: 11px; opacity: 0.8;">Last updated</div>' +
+                        '<div class="time">' + match[1] + '</div>';
+                } else {
+                    document.getElementById('update-time').textContent = 'Recently updated';
+                }
+            })
+            .catch(err => {
+                console.error('Error loading changelog:', err);
+                document.getElementById('content').innerHTML =
+                    '<div class="error">' +
+                    '<strong>Error loading changelog</strong><br>' +
+                    'Please try refreshing the page or check back later.' +
+                    '</div>';
+                document.getElementById('update-time').textContent = 'Error';
+            });
+    </script>
+</body>
+</html>'''
+
+        index_file.write_text(html_content, encoding='utf-8')
+        logger.info(f"Created index.html for GitHub Pages")
+    except Exception as e:
+        logger.error(f"Failed to create index.html: {e}")
+        raise
+
+
 def run_git_command(command, cwd=None):
     """Run a git command and return the result."""
     try:
@@ -224,6 +391,9 @@ def main():
 
         # Save the result
         save_markdown(markdown_content)
+
+        # Create index.html for GitHub Pages
+        create_index_html()
 
         # Commit and push to GitHub
         git_commit_and_push()
