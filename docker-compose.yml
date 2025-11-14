@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  trae-changelog-scraper:
+    build: .
+    container_name: trae-changelog-scraper
+    volumes:
+      # Mount the output directory (this should be a git repo)
+      - ./output:/app/output
+      # Mount SSH keys for GitHub authentication
+      - ${HOME}/.ssh:/root/.ssh:ro
+      # Mount git config
+      - ${HOME}/.gitconfig:/root/.gitconfig:ro
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+      - GIT_SSH_COMMAND=ssh -o StrictHostKeyChecking=no
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

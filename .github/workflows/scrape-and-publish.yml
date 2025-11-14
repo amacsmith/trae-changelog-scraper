@@ -1,0 +1,96 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main # Deploy when changes are pushed to main (by Docker)
+    paths:
+      - 'output/**' # Only deploy when output changes
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create index.html for GitHub Pages
+        run: |
+          cat > output/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Trae.ai Changelog</title>
+              <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown.min.css">
+              <style>
+                  body {
+                      box-sizing: border-box;
+                      min-width: 200px;
+                      max-width: 980px;
+                      margin: 0 auto;
+                      padding: 45px;
+                      background-color: #0d1117;
+                  }
+                  .markdown-body {
+                      background-color: #0d1117;
+                      color: #c9d1d9;
+                  }
+                  .markdown-body img {
+                      max-width: 100%;
+                      height: auto;
+                  }
+                  .update-badge {
+                      position: fixed;
+                      top: 20px;
+                      right: 20px;
+                      background: #238636;
+                      color: white;
+                      padding: 8px 12px;
+                      border-radius: 6px;
+                      font-size: 12px;
+                      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+                  }
+              </style>
+              <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+          </head>
+          <body>
+              <div class="update-badge" id="update-badge">
+                  <span id="update-time">Loading...</span>
+              </div>
+              <article class="markdown-body" id="content">
+                  Loading...
+              </article>
+              <script>
+                  fetch('changelog.md')
+                      .then(response => response.text())
+                      .then(text => {
+                          document.getElementById('content').innerHTML = marked.parse(text);
+                          // Extract update time from markdown
+                          const match = text.match(/Last updated: (.+)/);
+                          if (match) {
+                              document.getElementById('update-time').textContent = 'Updated: ' + match[1];
+                          }
+                      })
+                      .catch(err => {
+                          document.getElementById('content').innerHTML = '<p>Error loading changelog</p>';
+                          console.error(err);
+                      });
+              </script>
+          </body>
+          </html>
+          EOF
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./output
+          publish_branch: gh-pages
