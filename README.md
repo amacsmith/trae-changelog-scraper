@@ -66,14 +66,14 @@ This project uses a **dual-repository** approach:
 
 #### Step 1: Create Two GitHub Repositories
 
-1. **Create the main repository** (for the scraper code)
-   ```bash
-   gh repo create trae-changelog-scraper --public --source=. --remote=origin --push
+1. **Main repository** (contains the scraper code)
+   ```
+   https://github.com/amacsmith/trae-changelog-scraper
    ```
 
-2. **Create the output repository** (for the scraped content)
-   ```bash
-   gh repo create trae-changelog-output --public
+2. **Output repository** (contains the scraped content)
+   ```
+   https://github.com/amacsmith/trae-changed
    ```
 
 #### Step 2: Set Up the Output Directory
@@ -99,7 +99,7 @@ This will:
    - Click Save
 
 2. **Your changelog will be available at:**
-   `https://amacsmith.github.io/trae-changelog-output/`
+   `https://amacsmith.github.io/trae-changed/`
 
 #### Step 4: Start the Docker Service
 
@@ -140,7 +140,7 @@ After setting up as described above:
    - Click "Run workflow"
 
 5. **View your changelog**
-   - After the workflow completes, visit: `https://yourusername.github.io/trae-changelog-scraper/`
+   - After the workflow completes, visit: `https://amacsmith.github.io/trae-changed/`
 
 The changelog will update automatically every 15 minutes!
 

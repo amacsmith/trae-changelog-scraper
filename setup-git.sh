@@ -28,7 +28,7 @@ fi
 # Check if remote is set
 if ! git remote get-url origin &>/dev/null; then
     echo "Please enter your GitHub repository URL (SSH format):"
-    echo "Example: git@github.com:amacsmith/trae-changelog-output.git"
+    echo "Example: git@github.com:amacsmith/trae-changed.git"
     read -p "URL: " REPO_URL
 
     git remote add origin "$REPO_URL"
@@ -43,7 +43,7 @@ if [ ! -f "README.md" ]; then
 
 This repository contains the scraped changelog from Trae.ai.
 
-- **View Online**: [GitHub Pages](https://amacsmith.github.io/trae-changelog-output/)
+- **View Online**: [GitHub Pages](https://amacsmith.github.io/trae-changed/)
 - **Markdown**: [changelog.md](changelog.md)
 - **Images**: [images/](images/)
 
